@@ -1,4 +1,4 @@
-public enum LogicalSymbolType {
+public enum LogicalSymbolTypeEnum {
     XOR,
     CONJUNCTION,
     DISJUNCTION,
