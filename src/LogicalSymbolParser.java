@@ -5,7 +5,7 @@ public class LogicalSymbolParser {
       its equivalent enum form based on unicode values
      */
 
-    public static LogicalSymbolTypeEnum getParsedSymbol(char symbol) {
+    public static LogicalSymbolTypeEnum getParsedSymbol(char symbol) throws InvalidSymbolException {
         if (symbol == '\u21d2' || symbol == '\u2192') {
             return LogicalSymbolTypeEnum.IMPLICATION;
         } else if (symbol == '\u21d4' || symbol == '\u2261' || symbol == '\u2194') {
@@ -18,7 +18,10 @@ public class LogicalSymbolParser {
             return LogicalSymbolTypeEnum.DISJUNCTION;
         } else if (symbol == '\u2295' || symbol == '\u22bb') {
             return LogicalSymbolTypeEnum.XOR;
+        } else if (symbol == '(' || symbol == '[' || symbol == '{') {
+            return LogicalSymbolTypeEnum.BRACKET;
+        } else {
+            throw new InvalidSymbolException("One of the input symbols is invalid.");
         }
-        return null;
     }
 }

@@ -4,5 +4,6 @@ public enum LogicalSymbolTypeEnum {
     DISJUNCTION,
     IMPLICATION,
     NEGATION,
-    BICONDITIONAL
+    BICONDITIONAL,
+    BRACKET
 }
