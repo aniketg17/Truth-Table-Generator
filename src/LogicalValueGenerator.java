@@ -31,56 +31,46 @@ public class LogicalValueGenerator {
                 iterate++;
             }
             queueClone = new LinkedList<>(rpnQueue);
-            System.out.println(evaluateExpression(queueClone, variables));
+            System.out.println(i + " " + binaryGrid[i][0] + " " + binaryGrid[i][1] + " " + binaryGrid[i][2] +
+                    " " + binaryGrid[i][3] + " " + binaryGrid[i][4] + " " + binaryGrid[i][5] + " " + evaluateExpression(queueClone, variables));
         }
 
-       /*HashMap<Character, Boolean> s = new HashMap<>();
-       s.put('p', false);
-       s.put('q', false);
-       s.put('r', true);
-       s.put('s', true);*/
 
-
-        //  System.out.println(evaluateExpression(rpnQueue, s));
-
-      /*  Node root = convertToTree(rpnQueue);
-        evaluateTraversal(root);*/
+//        Node root = convertToTree(rpnQueue);
+//        evaluateTraversal(root);
     }
-
-//    P ∧ q ∧ q → R
 
     public static String[][] fillGrid() {
         String[][] grid = new String[(int) Math.pow(2, variables.size())][variables.size()];
 
         for (int i = 0; i < grid.length; i++) {
             String row = convertBinary(i);
-            for (int j = 0; j < row.length(); j++) {
-                String truthValue;
-                if (row.charAt(row.length() - j - 1) == 0) {
-                    truthValue = "False";
-                } else {
-                    truthValue = "True";
-                }
-                grid[i][row.length() - j - 1] = truthValue;
-            }
+            grid[i] = row.split(" ");
         }
         return grid;
     }
 
     public static String convertBinary(int num) {
         StringBuilder convertedBinary = new StringBuilder();
+        int stringAdditions = 0;
         while (num > 0) {
             int rem = num % 2;
             num = num / 2;
-            convertedBinary.insert(0, rem);
-        }
-
-        if (convertedBinary.length() < variables.size()) {
-            while (convertedBinary.length() < variables.size()) {
-                convertedBinary.insert(0, "0");
+            if (rem == 0) {
+                convertedBinary.insert(0, "False ");
+                ++stringAdditions;
+            } else {
+                convertedBinary.insert(0, "True ");
+                ++stringAdditions;
             }
         }
 
+        if (stringAdditions < variables.size()) {
+            while (stringAdditions < variables.size()) {
+                convertedBinary.insert(0, "False ");
+                ++stringAdditions;
+            }
+        }
         return convertedBinary.toString();
     }
 
@@ -96,8 +86,8 @@ public class LogicalValueGenerator {
                 LogicalSymbolTypeEnum parsedType = LogicalSymbolParser.getParsedSymbol((Character) removedItem);
                 LogicalSymbol currentSymbol = new LogicalSymbol(parsedType);
                 if (currentSymbol.getType() != LogicalSymbolTypeEnum.NEGATION) {
+                    boolean operandTwo = variables.pop(); // assigning operandTwo first because for implication order matters
                     boolean operandOne = variables.pop();
-                    boolean operandTwo = variables.pop();
                     variables.add(currentSymbol.applyOperation(operandOne, operandTwo));
                 } else {
                     boolean operandOne = variables.pop();
@@ -149,67 +139,71 @@ public class LogicalValueGenerator {
         return rpnConverted;
     }
 
-    static class Node<T> {
-        T value;
-        Node<T> left;
-        Node<T> right;
-
-        Node(T value) {
-            this.value = value;
-            this.left = null;
-            this.right = null;
-        }
-    }
-
-    /*public static Node convertToTree(Queue<Object> rpnExpression) throws InvalidSymbolException {
-        Stack<Object> operands = new Stack<>();
-
-        while (!rpnExpression.isEmpty()) {
-            Object currElement = rpnExpression.remove();
-
-            if (Character.isLetter((Character) currElement)) {
-                operands.push(currElement);
-            } else {
-                LogicalSymbolTypeEnum parsedType = LogicalSymbolParser.getParsedSymbol((Character) currElement);
-                LogicalSymbol currentSymbol = new LogicalSymbol(parsedType);
-
-                Node tree = new Node<>(currentSymbol);
-                if ((currentSymbol).getType() == LogicalSymbolTypeEnum.NEGATION) {
-                    tree.left = new Node<>(operands.pop());
-                    tree.right = null;
-                } else {
-                    tree.left = new Node<>(operands.pop());
-                    tree.right = new Node<>(operands.pop());
-                }
-                operands.push(tree);
-            }
-
-        }
-
-        assert operands.size() == 1; // size should be 1 because the only element in stack should be the root node
-        return (Node) operands.pop();
-    }
-
-    public static void evaluateTraversal(Node root) {
-        if (root == null) return;
-
-        if (root.value instanceof LogicalSymbol) {
-            System.out.println(((LogicalSymbol) root.value).getSymbol());
-            evaluateTraversal(root.left);
-            evaluateTraversal(root.right);
-        } else if (root.value instanceof Character){
-            System.out.println(root.value);
-            evaluateTraversal(root.left);
-            evaluateTraversal(root.right);
-        } else if (root.value instanceof Node) {
-            Node n = (Node) root.value;
-            LogicalSymbol s = (LogicalSymbol) n.value;
-            System.out.println((s.getSymbol()));
-            evaluateTraversal(n.left);
-            evaluateTraversal(n.right);
-        }
-
-
-    }*/
+//    static class Node<T> {
+//        T value;
+//        Node<T> left;
+//        Node<T> right;
+//
+//        Node(T value) {
+//            this.value = value;
+//            this.left = null;
+//            this.right = null;
+//        }
+//    }
+//
+//    public static Node convertToTree(Queue<Object> rpnExpression) throws InvalidSymbolException {
+//        Stack<Object> operands = new Stack<>();
+//
+//        while (!rpnExpression.isEmpty()) {
+//            Object currElement = rpnExpression.remove();
+//
+//            if (Character.isLetter((Character) currElement)) {
+//                operands.push(currElement);
+//            } else {
+//                LogicalSymbolTypeEnum parsedType = LogicalSymbolParser.getParsedSymbol((Character) currElement);
+//                LogicalSymbol currentSymbol = new LogicalSymbol(parsedType);
+//
+//                Node tree = new Node<>(currentSymbol);
+//                if ((currentSymbol).getType() == LogicalSymbolTypeEnum.NEGATION) {
+//                    tree.left = new Node<>(operands.pop());
+//                    tree.right = null;
+//                } else {
+//                    tree.left = new Node<>(operands.pop());
+//                    tree.right = new Node<>(operands.pop());
+//                }
+//                operands.push(tree);
+//            }
+//
+//        }
+//
+//        assert operands.size() == 1; // size should be 1 because the only element in stack should be the root node
+//        return (Node) operands.pop();
+//    }
+//
+//    public static void evaluateTraversal(Node root) {
+//        if (root == null) return;
+//
+//        if (root.value instanceof LogicalSymbol && root.left != null && root.left.value instanceof Character && root.right != null && root.right.value instanceof Character) {
+//            System.out.println("reached end");
+//        } else {
+//            if (root.value instanceof LogicalSymbol) {
+//                System.out.println(((LogicalSymbol) root.value).getSymbol());
+//                evaluateTraversal(root.left);
+//                evaluateTraversal(root.right);
+//            } else if (root.value instanceof Character) {
+//                System.out.println(root.value);
+//                evaluateTraversal(root.left);
+//                evaluateTraversal(root.right);
+//            } else if (root.value instanceof Node) {
+//                Node n = (Node) root.value;
+//                LogicalSymbol s = (LogicalSymbol) n.value;
+//                System.out.println((s.getSymbol()));
+//                evaluateTraversal(n.left);
+//                evaluateTraversal(n.right);
+//            }
+//        }
+//
+//
+//    }
 
 }
