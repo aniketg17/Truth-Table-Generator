@@ -41,4 +41,21 @@ public class LogicalSymbol {
     public char getSymbol() {
         return symbol;
     }
+
+    public boolean applyOperation(boolean operand1, boolean operand2) {
+        if (type == LogicalSymbolTypeEnum.NEGATION) {
+            return !operand1;
+        } else if (type == LogicalSymbolTypeEnum.CONJUNCTION) {
+            return operand1 & operand2;
+        } else if (type == LogicalSymbolTypeEnum.DISJUNCTION) {
+            return operand1 | operand2;
+        } else if (type == LogicalSymbolTypeEnum.IMPLICATION) {
+            return (operand2 | !operand1);
+        } else if (type == LogicalSymbolTypeEnum.BICONDITIONAL) {
+            return operand1 == operand2;
+        } else if (type == LogicalSymbolTypeEnum.XOR) {
+            return operand1 ^ operand2;
+        }
+        return false;
+    }
 }
