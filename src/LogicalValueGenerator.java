@@ -3,21 +3,27 @@ import java.util.*;
 public class LogicalValueGenerator {
     private static TreeMap<Character, Boolean> variables = new TreeMap<>(); // use to maintain the total number
     // of variables in expression
+    private String expressionToConvert;
+    private String[][] binaryGrid;
 
-    public static void main(String[] args) throws InvalidSymbolException {
-        Scanner sc = new Scanner(System.in);
-        System.out.println("Enter the logical expression:");
-        String expression = sc.nextLine();
-        String cleanExpression = expression.replaceAll("\\s", "");
-        cleanExpression = cleanExpression.toLowerCase();
-        Queue<Object> rpnQueue = postfixConversion(cleanExpression);
-       /* while (!rpnQueue.isEmpty()) {
-            System.out.print(rpnQueue.remove());
-        }*/
+    public LogicalValueGenerator(String expressionToConvert) {
+        this.expressionToConvert = expressionToConvert;
+    }
 
-        String[][] binaryGrid = fillGrid();
 
+    public String[][] getBinaryGrid() {
+        return binaryGrid;
+    }
+
+    public boolean[] truthValuesGenerator() throws InvalidSymbolException {
+        if (expressionToConvert == null || expressionToConvert.equals("")) {
+            throw new InvalidSymbolException("No expression to parse!");
+        }
+        Queue<Object> rpnQueue = postfixConversion(expressionToConvert);
+        binaryGrid = fillGrid();
         Queue<Object> queueClone;
+        boolean[] truthValues = new boolean[(int) Math.pow(2, variables.size())];
+
         for (int i = 0; i < binaryGrid.length; i++) {
             int iterate = 0;
             for (Character character : variables.keySet()) {
@@ -31,16 +37,19 @@ public class LogicalValueGenerator {
                 iterate++;
             }
             queueClone = new LinkedList<>(rpnQueue);
-            System.out.println(i + " " + binaryGrid[i][0] + " " + binaryGrid[i][1] + " " + binaryGrid[i][2] +
-                    " " + binaryGrid[i][3] + " " + binaryGrid[i][4] + " " + binaryGrid[i][5] + " " + evaluateExpression(queueClone, variables));
+            truthValues[i] = evaluateExpression(queueClone, variables);
+//            System.out.println(i + " " + binaryGrid[i][0] + " " + binaryGrid[i][1] + " " + binaryGrid[i][2] +
+//                    " " + binaryGrid[i][3] + " " + binaryGrid[i][4] + " " + binaryGrid[i][5] + " " + evaluateExpression(queueClone, variables));
         }
 
-
-//        Node root = convertToTree(rpnQueue);
-//        evaluateTraversal(root);
+        return truthValues;
     }
 
-    public static String[][] fillGrid() {
+    public static TreeMap<Character, Boolean> getVariables() {
+        return variables;
+    }
+
+    public  String[][] fillGrid() {
         String[][] grid = new String[(int) Math.pow(2, variables.size())][variables.size()];
 
         for (int i = 0; i < grid.length; i++) {
@@ -50,7 +59,7 @@ public class LogicalValueGenerator {
         return grid;
     }
 
-    public static String convertBinary(int num) {
+    public  String convertBinary(int num) {
         StringBuilder convertedBinary = new StringBuilder();
         int stringAdditions = 0;
         while (num > 0) {
@@ -75,7 +84,7 @@ public class LogicalValueGenerator {
     }
 
 
-    public static boolean evaluateExpression(Queue<Object> rpnExpression, TreeMap<Character, Boolean> values) throws InvalidSymbolException {
+    public  boolean evaluateExpression(Queue<Object> rpnExpression, TreeMap<Character, Boolean> values) throws InvalidSymbolException {
         Stack<Boolean> variables = new Stack<>();
 
         while (!rpnExpression.isEmpty()) {
@@ -98,7 +107,7 @@ public class LogicalValueGenerator {
         return variables.pop();
     }
 
-    public static Queue<Object> postfixConversion(String original) throws InvalidSymbolException {
+    public  Queue<Object> postfixConversion(String original) throws InvalidSymbolException {
         Queue<Object> rpnConverted = new LinkedList<>();
         Stack<LogicalSymbol> operators = new Stack<>();
 
