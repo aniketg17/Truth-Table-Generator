@@ -1,7 +1,7 @@
 import java.util.*;
 
 public class LogicalValueGenerator {
-    private static TreeMap<Character, Boolean> variables = new TreeMap<>(); // use to maintain the total number
+    private TreeMap<Character, Boolean> variables = new TreeMap<>(); // use to maintain the total number
     // of variables in expression
     private String expressionToConvert;
     private String[][] binaryGrid;
@@ -45,7 +45,7 @@ public class LogicalValueGenerator {
         return truthValues;
     }
 
-    public static TreeMap<Character, Boolean> getVariables() {
+    public TreeMap<Character, Boolean> getVariables() {
         return variables;
     }
 
