@@ -1,29 +1,30 @@
 import javafx.application.Application;
 import javafx.beans.property.ReadOnlyObjectWrapper;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.geometry.Pos;
+import javafx.geometry.Insets;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
-import javafx.scene.text.*;
-import javafx.geometry.Insets;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
-import javafx.util.Callback;
-import jdk.dynalink.beans.StaticClass;
 
-import java.util.Stack;
 import java.util.TreeMap;
+
+
+/**
+ * <h1>GUI for truth tables</h1>
+ * This class generates the GUI and
+ * displays all the expressions and evaluations conducted in
+ * LogicalValueGenerator
+ * <p>
+ *
+ * @author  Aniket Kumar Gupta
+ */
 
 public class TruthTableGUI extends Application {
 
@@ -35,6 +36,13 @@ public class TruthTableGUI extends Application {
     public static void main(String[] args) {
         launch();
     }
+
+    /**
+     * This method is responsible for developing the user interface to view the
+     * truth table with the 2D True/False grid as well as the evaluated expression.
+     * Error handling is done here as well for validation purposes.
+     * @param stage This is the initial stage for the GUI component to which other nodes will be added
+     */
 
     @Override
     public void start(Stage stage) {
@@ -85,7 +93,6 @@ public class TruthTableGUI extends Application {
                 }
 
 
-
                 LogicalValueGenerator generator = new LogicalValueGenerator(cleanExpression);
                 try {
                     truthValues = generator.truthValuesGenerator();
@@ -97,18 +104,18 @@ public class TruthTableGUI extends Application {
                     for (Character character : variables.keySet()) {
                         final int i = iterator;
                         TableColumn<ObservableList<String>, String> column = new TableColumn<>(Character.toString(character));
-
+                        column.setResizable(false);
                         column.setCellValueFactory(observableListStringCellDataFeatures ->
                                 new ReadOnlyObjectWrapper<>(observableListStringCellDataFeatures.getValue().get(i)));
                         tableView.getColumns().add(column);
                         ++iterator;
                     }
 
-                    final int iterator2 = iterator;
+                    final int lastColumnIdx = iterator;
                     TableColumn<ObservableList<String>, String> column = new TableColumn<>(expression);
                     column.setCellValueFactory(observableListStringCellDataFeatures ->
-                            new ReadOnlyObjectWrapper<>(observableListStringCellDataFeatures.getValue().get(iterator2)));
-
+                            new ReadOnlyObjectWrapper<>(observableListStringCellDataFeatures.getValue().get(lastColumnIdx)));
+                    column.setResizable(false);
                     tableView.getColumns().add(column);
 
                     data = FXCollections.observableArrayList();
@@ -160,9 +167,16 @@ public class TruthTableGUI extends Application {
 
     }
 
+    /**
+     * This method is one of the expression validation methods to ensure that there
+     * are no recurring consecutive letters.
+     * @param cleanExpression This is the string in its clean form (non-RPN)
+     * @return boolean This returns whether the string passed in has consecutive letters (invalid expression)
+     */
+
     private boolean validateExpressionWithConsecutiveLetters(String cleanExpression) {
         for (int i = 0; i < cleanExpression.length() - 1; i++) {
-            if (Character.isLetter(cleanExpression.charAt(i)) && Character.isLetter(cleanExpression.charAt(i+1))) {
+            if (Character.isLetter(cleanExpression.charAt(i)) && Character.isLetter(cleanExpression.charAt(i + 1))) {
                 return false;
             }
         }

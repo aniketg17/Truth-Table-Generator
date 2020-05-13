@@ -1,19 +1,47 @@
 import java.util.*;
 
+/**
+ * <h1>Logical Value Generation (Main Class)</h1>
+ * This class constructs the binary grid for each of the variables
+ * and for each row of binary values
+ * assigns the result of the provided expression. This is the class
+ * where all of the evaluation is done.
+ * <p>
+ *
+ * @author  Aniket Kumar Gupta
+ */
+
 public class LogicalValueGenerator {
     private TreeMap<Character, Boolean> variables = new TreeMap<>(); // use to maintain the total number
-                                                                        // of variables in expression
+    // of variables in expression
     private String expressionToConvert;
     private String[][] binaryGrid;
+
+    /**
+     * This constructor initialises its class object with the string to be evaluated
+     * @param expressionToConvert This is the expression that needs to be evaluated
+     */
 
     public LogicalValueGenerator(String expressionToConvert) {
         this.expressionToConvert = expressionToConvert;
     }
 
 
+    /**
+     * This method is a getter for the binaryGrid generated
+     * @return String[][] This returns the 2D String binary grid.
+     */
+
     public String[][] getBinaryGrid() {
         return binaryGrid;
     }
+
+    /**
+     * This method is used to assign each variable in the treemap
+     * a truth value and then depending on that call the method
+     * to evaluate the expression
+     * @return boolean[] This returns the boolean array with evaluated truth values.
+     */
 
     public boolean[] truthValuesGenerator() throws InvalidSymbolException {
         if (expressionToConvert == null || expressionToConvert.equals("")) {
@@ -38,18 +66,28 @@ public class LogicalValueGenerator {
             }
             queueClone = new LinkedList<>(rpnQueue);
             truthValues[i] = evaluateExpression(queueClone, variables);
-//            System.out.println(i + " " + binaryGrid[i][0] + " " + binaryGrid[i][1] + " " + binaryGrid[i][2] +
-//                    " " + binaryGrid[i][3] + " " + binaryGrid[i][4] + " " + binaryGrid[i][5] + " " + evaluateExpression(queueClone, variables));
         }
 
         return truthValues;
     }
 
+    /**
+     * This method is a getter for the TreeMap storing variables
+     * @return TreeMap This returns TreeMap containing the variables with current truth values.
+     */
+
     public TreeMap<Character, Boolean> getVariables() {
         return variables;
     }
 
-    public  String[][] fillGrid() {
+    /**
+     * This method is used to fill the 2D grid depending on which, for each set of truth values of
+     * variables, the expression is evaluated row-wise.
+     * @return String[][] This returns the String 2D array containing all possible combinations
+     * of truth values for all variables
+     */
+
+    public String[][] fillGrid() {
         String[][] grid = new String[(int) Math.pow(2, variables.size())][variables.size()];
 
         for (int i = 0; i < grid.length; i++) {
@@ -59,7 +97,16 @@ public class LogicalValueGenerator {
         return grid;
     }
 
-    public  String convertBinary(int num) {
+    /**
+     * This method is used to convert a number to binary
+     * and then represent those binary values as a String containing
+     * "True" and "False". For example, the binary number 10 would mean
+     * "True False"
+     * @param num This is the number to be represented as String
+     * @return String This returns the string as combination of True and False.
+     */
+
+    public String convertBinary(int num) {
         StringBuilder convertedBinary = new StringBuilder();
         int stringAdditions = 0;
         while (num > 0) {
@@ -84,7 +131,17 @@ public class LogicalValueGenerator {
     }
 
 
-    public  boolean evaluateExpression(Queue<Object> rpnExpression, TreeMap<Character, Boolean> values) throws InvalidSymbolException {
+    /**
+     * This method uses a variation of Shunting Yard algorithm
+     * to evaluate the expression converted already to reverse Polish
+     * notation. Based on that, it returns a truth value.
+     * @param rpnExpression This is the logical expression in RPN represented as a queue
+     * @param values  This TreeMap contains the variables along with their associated truth values
+     * @return boolean This returns the truth value of the expression for the variable values
+     * passed in
+     */
+
+    public boolean evaluateExpression(Queue<Object> rpnExpression, TreeMap<Character, Boolean> values) throws InvalidSymbolException {
         Stack<Boolean> variables = new Stack<>();
 
         try {
@@ -111,7 +168,15 @@ public class LogicalValueGenerator {
         }
     }
 
-    public  Queue<Object> postfixConversion(String original) throws InvalidSymbolException {
+    /**
+     * This method is used to convert an expression into RPN
+     * using Stacks and Queues. Validation for brackets is also included
+     * to ensure that the number of brackets and their forms are correct.
+     * @param original This is the string in its original form to be converted to RPN
+     * @return Queue This returns the string in RPN as a queue of Objects
+     */
+
+    public Queue<Object> postfixConversion(String original) throws InvalidSymbolException {
         Queue<Object> rpnConverted = new LinkedList<>();
         Stack<LogicalSymbol> operators = new Stack<>();
         Stack<Character> bracketValidation = new Stack<>();
