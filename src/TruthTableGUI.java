@@ -20,6 +20,7 @@ import javafx.geometry.Insets;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.util.Callback;
+import jdk.dynalink.beans.StaticClass;
 
 import java.util.Stack;
 import java.util.TreeMap;
@@ -36,11 +37,11 @@ public class TruthTableGUI extends Application {
     }
 
     @Override
-    public void start(Stage stage) throws Exception {
+    public void start(Stage stage) {
         Scene scene = new Scene(new Group());
         stage.setTitle("Truth Table Generator");
         stage.setWidth(1000);
-        stage.setHeight(700);
+        stage.setHeight(600);
 
         Label label = new Label("Disclaimer: Please use Well Formed Formulae (WFF) for maximum accuracy. " +
                 "Software uses conventional notation.");
@@ -65,6 +66,26 @@ public class TruthTableGUI extends Application {
                 String expression = expressionInput.getText();
                 String cleanExpression = expression.replaceAll("\\s", "");
                 cleanExpression = cleanExpression.toLowerCase();
+
+                boolean valid = validateExpressionWithConsecutiveLetters(cleanExpression);
+
+                char lastChar = cleanExpression.charAt(cleanExpression.length() - 1);
+                if ((!Character.isLetter(lastChar) &&
+                        lastChar != ')' && lastChar != ']' && lastChar != '}') || !valid) {
+                    try {
+                        throw new InvalidSymbolException("Invalid Expression Syntax");
+                    } catch (InvalidSymbolException e) {
+                        Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+                        errorAlert.setHeaderText("Invalid Expression");
+                        errorAlert.setContentText(e.getMessage());
+                        errorAlert.showAndWait();
+                        e.printStackTrace();
+                        return;
+                    }
+                }
+
+
+
                 LogicalValueGenerator generator = new LogicalValueGenerator(cleanExpression);
                 try {
                     truthValues = generator.truthValuesGenerator();
@@ -74,29 +95,19 @@ public class TruthTableGUI extends Application {
 
                     int iterator = 0;
                     for (Character character : variables.keySet()) {
-                        System.out.println(character);
                         final int i = iterator;
                         TableColumn<ObservableList<String>, String> column = new TableColumn<>(Character.toString(character));
 
-                        column.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<ObservableList<String>, String>, ObservableValue<String>>() {
-                            @Override
-                            public ObservableValue<String> call(TableColumn.CellDataFeatures<ObservableList<String>, String> observableListStringCellDataFeatures) {
-                                return new ReadOnlyObjectWrapper<>(observableListStringCellDataFeatures.getValue().get(i));
-                            }
-                        });
+                        column.setCellValueFactory(observableListStringCellDataFeatures ->
+                                new ReadOnlyObjectWrapper<>(observableListStringCellDataFeatures.getValue().get(i)));
                         tableView.getColumns().add(column);
                         ++iterator;
                     }
 
                     final int iterator2 = iterator;
-                    //TableColumn expressionColumn = new TableColumn(expression);
                     TableColumn<ObservableList<String>, String> column = new TableColumn<>(expression);
-                    column.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<ObservableList<String>, String>, ObservableValue<String>>() {
-                        @Override
-                        public ObservableValue<String> call(TableColumn.CellDataFeatures<ObservableList<String>, String> observableListStringCellDataFeatures) {
-                            return new ReadOnlyObjectWrapper<>(observableListStringCellDataFeatures.getValue().get(iterator2));
-                        }
-                    });
+                    column.setCellValueFactory(observableListStringCellDataFeatures ->
+                            new ReadOnlyObjectWrapper<>(observableListStringCellDataFeatures.getValue().get(iterator2)));
 
                     tableView.getColumns().add(column);
 
@@ -119,6 +130,10 @@ public class TruthTableGUI extends Application {
                     }
 
                 } catch (InvalidSymbolException e) {
+                    Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+                    errorAlert.setHeaderText("Invalid Expression");
+                    errorAlert.setContentText(e.getMessage());
+                    errorAlert.showAndWait();
                     e.printStackTrace(); // add proper exception handling for GUI
                 }
             }
@@ -144,4 +159,14 @@ public class TruthTableGUI extends Application {
         stage.show();
 
     }
+
+    private boolean validateExpressionWithConsecutiveLetters(String cleanExpression) {
+        for (int i = 0; i < cleanExpression.length() - 1; i++) {
+            if (Character.isLetter(cleanExpression.charAt(i)) && Character.isLetter(cleanExpression.charAt(i+1))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
 }

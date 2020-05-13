@@ -2,7 +2,7 @@ import java.util.*;
 
 public class LogicalValueGenerator {
     private TreeMap<Character, Boolean> variables = new TreeMap<>(); // use to maintain the total number
-    // of variables in expression
+                                                                        // of variables in expression
     private String expressionToConvert;
     private String[][] binaryGrid;
 
@@ -87,132 +87,83 @@ public class LogicalValueGenerator {
     public  boolean evaluateExpression(Queue<Object> rpnExpression, TreeMap<Character, Boolean> values) throws InvalidSymbolException {
         Stack<Boolean> variables = new Stack<>();
 
-        while (!rpnExpression.isEmpty()) {
-            Object removedItem = rpnExpression.remove();
-            if (Character.isLetter((Character) removedItem)) {
-                variables.add(values.get(removedItem));
-            } else {
-                LogicalSymbolTypeEnum parsedType = LogicalSymbolParser.getParsedSymbol((Character) removedItem);
-                LogicalSymbol currentSymbol = new LogicalSymbol(parsedType);
-                if (currentSymbol.getType() != LogicalSymbolTypeEnum.NEGATION) {
-                    boolean operandTwo = variables.pop(); // assigning operandTwo first because for implication order matters
-                    boolean operandOne = variables.pop();
-                    variables.add(currentSymbol.applyOperation(operandOne, operandTwo));
+        try {
+            while (!rpnExpression.isEmpty()) {
+                Object removedItem = rpnExpression.remove();
+                if (Character.isLetter((Character) removedItem)) {
+                    variables.add(values.get(removedItem));
                 } else {
-                    boolean operandOne = variables.pop();
-                    variables.add(currentSymbol.applyOperation(operandOne, false));
+                    LogicalSymbolTypeEnum parsedType = LogicalSymbolParser.getParsedSymbol((Character) removedItem);
+                    LogicalSymbol currentSymbol = new LogicalSymbol(parsedType);
+                    if (currentSymbol.getType() != LogicalSymbolTypeEnum.NEGATION) {
+                        boolean operandTwo = variables.pop(); // assigning operandTwo first because for implication order matters
+                        boolean operandOne = variables.pop();
+                        variables.add(currentSymbol.applyOperation(operandOne, operandTwo));
+                    } else {
+                        boolean operandOne = variables.pop();
+                        variables.add(currentSymbol.applyOperation(operandOne, false));
+                    }
                 }
             }
+            return variables.pop();
+        } catch (EmptyStackException e) {
+            throw new InvalidSymbolException("Invalid Expression Syntax");
         }
-        return variables.pop();
     }
 
     public  Queue<Object> postfixConversion(String original) throws InvalidSymbolException {
         Queue<Object> rpnConverted = new LinkedList<>();
         Stack<LogicalSymbol> operators = new Stack<>();
+        Stack<Character> bracketValidation = new Stack<>();
 
-        for (int i = 0; i < original.length(); i++) {
-            char currentChar = original.charAt(i);
-            if (Character.isLetter(original.charAt(i))) {
-                rpnConverted.add(currentChar);
-                variables.put(currentChar, false);
-            } else if (currentChar == ')' || currentChar == ']' || currentChar == '}') {
-                while (!operators.isEmpty() && operators.peek().getType() != LogicalSymbolTypeEnum.BRACKET) {
-                    rpnConverted.add(operators.pop().getSymbol());
-                }
-                operators.pop();
-            } else {
-                LogicalSymbolTypeEnum parsedType = LogicalSymbolParser.getParsedSymbol(currentChar);
-                LogicalSymbol currentSymbol = new LogicalSymbol(parsedType);
-                if (currentSymbol.getType() == LogicalSymbolTypeEnum.BRACKET) {
-                    operators.push(currentSymbol);
+        try {
+            for (int i = 0; i < original.length(); i++) {
+                char currentChar = original.charAt(i);
+                if (Character.isLetter(original.charAt(i))) {
+                    rpnConverted.add(currentChar);
+                    variables.put(currentChar, false);
+                } else if (currentChar == ')' || currentChar == ']' || currentChar == '}') {
+                    if (bracketValidation.isEmpty() || bracketValidation.pop() != currentChar) {
+                        throw new InvalidSymbolException("Brackets are malformed!");
+                    }
+                    while (!operators.isEmpty() && operators.peek().getType() != LogicalSymbolTypeEnum.BRACKET) {
+                        rpnConverted.add(operators.pop().getSymbol());
+                    }
+                    operators.pop();
                 } else {
-                    if (!operators.isEmpty() && operators.peek().getPrecedence() > currentSymbol.getPrecedence()) {
-                        while (!operators.isEmpty() &&
-                                operators.peek().getPrecedence() > currentSymbol.getPrecedence() &&
-                                operators.peek().getType() != LogicalSymbolTypeEnum.BRACKET) {
-
-                            LogicalSymbol poppedSymbol = operators.pop();
-                            rpnConverted.add(poppedSymbol.getSymbol());
+                    LogicalSymbolTypeEnum parsedType = LogicalSymbolParser.getParsedSymbol(currentChar);
+                    LogicalSymbol currentSymbol = new LogicalSymbol(parsedType);
+                    if (currentSymbol.getType() == LogicalSymbolTypeEnum.BRACKET) {
+                        operators.push(currentSymbol);
+                        if (currentChar == '(') {
+                            bracketValidation.push(')');
+                        } else if (currentChar == '[') {
+                            bracketValidation.push(']');
+                        } else {
+                            bracketValidation.push('}');
                         }
-                        operators.push(currentSymbol);
                     } else {
-                        operators.push(currentSymbol);
+                        if (!operators.isEmpty() && operators.peek().getPrecedence() > currentSymbol.getPrecedence()) {
+                            while (!operators.isEmpty() &&
+                                    operators.peek().getPrecedence() > currentSymbol.getPrecedence() &&
+                                    operators.peek().getType() != LogicalSymbolTypeEnum.BRACKET) {
+
+                                LogicalSymbol poppedSymbol = operators.pop();
+                                rpnConverted.add(poppedSymbol.getSymbol());
+                            }
+                            operators.push(currentSymbol);
+                        } else {
+                            operators.push(currentSymbol);
+                        }
                     }
                 }
             }
+            while (!operators.isEmpty()) {
+                rpnConverted.add(operators.pop().getSymbol());
+            }
+            return rpnConverted;
+        } catch (EmptyStackException e) {
+            throw new InvalidSymbolException("Invalid Expression Syntax");
         }
-        while (!operators.isEmpty()) {
-            rpnConverted.add(operators.pop().getSymbol());
-        }
-        return rpnConverted;
     }
-
-//    static class Node<T> {
-//        T value;
-//        Node<T> left;
-//        Node<T> right;
-//
-//        Node(T value) {
-//            this.value = value;
-//            this.left = null;
-//            this.right = null;
-//        }
-//    }
-//
-//    public static Node convertToTree(Queue<Object> rpnExpression) throws InvalidSymbolException {
-//        Stack<Object> operands = new Stack<>();
-//
-//        while (!rpnExpression.isEmpty()) {
-//            Object currElement = rpnExpression.remove();
-//
-//            if (Character.isLetter((Character) currElement)) {
-//                operands.push(currElement);
-//            } else {
-//                LogicalSymbolTypeEnum parsedType = LogicalSymbolParser.getParsedSymbol((Character) currElement);
-//                LogicalSymbol currentSymbol = new LogicalSymbol(parsedType);
-//
-//                Node tree = new Node<>(currentSymbol);
-//                if ((currentSymbol).getType() == LogicalSymbolTypeEnum.NEGATION) {
-//                    tree.left = new Node<>(operands.pop());
-//                    tree.right = null;
-//                } else {
-//                    tree.left = new Node<>(operands.pop());
-//                    tree.right = new Node<>(operands.pop());
-//                }
-//                operands.push(tree);
-//            }
-//
-//        }
-//
-//        assert operands.size() == 1; // size should be 1 because the only element in stack should be the root node
-//        return (Node) operands.pop();
-//    }
-//
-//    public static void evaluateTraversal(Node root) {
-//        if (root == null) return;
-//
-//        if (root.value instanceof LogicalSymbol && root.left != null && root.left.value instanceof Character && root.right != null && root.right.value instanceof Character) {
-//            System.out.println("reached end");
-//        } else {
-//            if (root.value instanceof LogicalSymbol) {
-//                System.out.println(((LogicalSymbol) root.value).getSymbol());
-//                evaluateTraversal(root.left);
-//                evaluateTraversal(root.right);
-//            } else if (root.value instanceof Character) {
-//                System.out.println(root.value);
-//                evaluateTraversal(root.left);
-//                evaluateTraversal(root.right);
-//            } else if (root.value instanceof Node) {
-//                Node n = (Node) root.value;
-//                LogicalSymbol s = (LogicalSymbol) n.value;
-//                System.out.println((s.getSymbol()));
-//                evaluateTraversal(n.left);
-//                evaluateTraversal(n.right);
-//            }
-//        }
-//
-//
-//    }
-
 }
