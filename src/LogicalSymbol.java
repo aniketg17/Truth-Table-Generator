@@ -10,9 +10,9 @@
  */
 
 public class LogicalSymbol {
-    private LogicalSymbolTypeEnum type;
-    private int precedence;
-    private char symbol;  // symbol used for consistent internal representation while building ADT
+    private LogicalSymbolTypeEnum type; // assigned logical symbol enum type to differentiate each operation
+    private int precedence; // for operation's precedence level
+    private char symbol;  // symbol used for consistent internal representation
 
     /**
      * This constructor instantiates each object with the data

@@ -4,8 +4,8 @@ import java.util.*;
  * <h1>Logical Value Generation (Main Class)</h1>
  * This class constructs the binary grid for each of the variables
  * and for each row of binary values
- * assigns the result of the provided expression. This is the class
- * where all of the evaluation is done.
+ * calculates the result of the provided expression. This is the class
+ * where all of the expression evaluation is done.
  * <p>
  *
  * @author  Aniket Kumar Gupta
@@ -47,8 +47,8 @@ public class LogicalValueGenerator {
         if (expressionToConvert == null || expressionToConvert.equals("")) {
             throw new InvalidSymbolException("No expression to parse!");
         }
-        Queue<Object> rpnQueue = postfixConversion(expressionToConvert);
-        binaryGrid = fillGrid();
+        Queue<Object> rpnQueue = postfixConversion(expressionToConvert); // converted expression in RPN
+        binaryGrid = fillGrid(); // binary grid ready
         Queue<Object> queueClone;
         boolean[] truthValues = new boolean[(int) Math.pow(2, variables.size())];
 
@@ -61,11 +61,12 @@ public class LogicalValueGenerator {
                 } else {
                     value = true;
                 }
-                variables.replace(character, value);
+                variables.replace(character, value); // update treemap with new values
                 iterate++;
             }
             queueClone = new LinkedList<>(rpnQueue);
-            truthValues[i] = evaluateExpression(queueClone, variables);
+            truthValues[i] = evaluateExpression(queueClone, variables); // based on treemap values,
+                                                                        // calculate the expression value
         }
 
         return truthValues;
@@ -179,7 +180,7 @@ public class LogicalValueGenerator {
     public Queue<Object> postfixConversion(String original) throws InvalidSymbolException {
         Queue<Object> rpnConverted = new LinkedList<>();
         Stack<LogicalSymbol> operators = new Stack<>();
-        Stack<Character> bracketValidation = new Stack<>();
+        Stack<Character> bracketValidation = new Stack<>(); // used to ensure consistent use of brackets in string
 
         try {
             for (int i = 0; i < original.length(); i++) {
@@ -201,7 +202,7 @@ public class LogicalValueGenerator {
                     if (currentSymbol.getType() == LogicalSymbolTypeEnum.BRACKET) {
                         operators.push(currentSymbol);
                         if (currentChar == '(') {
-                            bracketValidation.push(')');
+                            bracketValidation.push(')'); // add the required closing bracket to match opening one
                         } else if (currentChar == '[') {
                             bracketValidation.push(']');
                         } else {
@@ -212,7 +213,6 @@ public class LogicalValueGenerator {
                             while (!operators.isEmpty() &&
                                     operators.peek().getPrecedence() > currentSymbol.getPrecedence() &&
                                     operators.peek().getType() != LogicalSymbolTypeEnum.BRACKET) {
-
                                 LogicalSymbol poppedSymbol = operators.pop();
                                 rpnConverted.add(poppedSymbol.getSymbol());
                             }
@@ -224,7 +224,7 @@ public class LogicalValueGenerator {
                 }
             }
             while (!operators.isEmpty()) {
-                rpnConverted.add(operators.pop().getSymbol());
+                rpnConverted.add(operators.pop().getSymbol()); // add remaining operators in stack
             }
             return rpnConverted;
         } catch (EmptyStackException e) {
