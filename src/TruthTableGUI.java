@@ -112,10 +112,9 @@ public class TruthTableGUI extends Application {
                     }
 
                     final int lastColumnIdx = iterator;
-                    TableColumn<ObservableList<String>, String> column = new TableColumn<>(expression);
+                    TableColumn<ObservableList<String>, String> column = new TableColumn<>(cleanExpression);
                     column.setCellValueFactory(observableListStringCellDataFeatures ->
                             new ReadOnlyObjectWrapper<>(observableListStringCellDataFeatures.getValue().get(lastColumnIdx)));
-                    column.setResizable(false);
                     tableView.getColumns().add(column);
 
                     data = FXCollections.observableArrayList();
